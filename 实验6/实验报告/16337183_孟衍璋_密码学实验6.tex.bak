@@ -1,0 +1,59 @@
+\documentclass{ctexart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}   %添加宏包插图
+\usepackage{fancyhdr} %设置页脚页眉需要的包
+\CTEXsetup[format={\Large\bfseries}]{section} %标题居左
+\title{密码学实验六实验报告}
+\author{16337183 孟衍璋}
+\date{}
+
+\pagestyle{fancy}
+\lhead{DLP求解}
+\rhead{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\begin{document}
+\maketitle
+\newpage
+\section{实验目的}
+\indent 利用合适的算法求解附件中给定参数的模p剩余类域中离散对数挑战问题，并获取DH密钥交换协议中的共同信息。\\
+\section{实验内容}
+\includegraphics[width=5.00in,height=3.9in]{figure1} \\ \\
+\indent 给出已知信息：
+
+\indent $p=568254902274842463133913191337012578621250922758849353787467 \\ \indent \,\,\,\,\,\,\,\,\,\,\,317363493600872590435893544210146655556112445578284746895502 \\ \indent \,\,\,\,\,\,\,\,\,\,\,8529037660533553941399408331331403379$\\
+\indent $g=241049705597043288134549339784611219899508877136430719518973 \\ \indent \,\,\,\,\,\,\,\,\,\,\,403120560518695124187509679645906174178166738043707687470530 \\ \indent \,\,\,\,\,\,\,\,\,\,\,0974836586165283741668656930807264789$\\
+\indent $y_a=9737682843413262723015537511143226853243408059020696133396 \\ \indent \,\,\,\,\,\,\,\,\,\,\,\,\,\,6714218780152958535240697503092700875257191707971631822107 \\ \indent \,\,\,\,\,\,\,\,\,\,\,\,\,\,7758236884342662829402529734009607531649$\\
+\indent $y_b=4149822765985031146554298777122732051870868431387323913747 \\ \indent \,\,\,\,\,\,\,\,\,\,\,\,\,\,7857916853105088368362837029264468170001148680075557175463 \\ \indent \,\,\,\,\,\,\,\,\,\,\,\,\,\,62425841865173929670156568682745060708314$\\
+
+\section{实验及算法原理}
+\indent 使用$Pollard's \,\rho  \, algorithm$，解决此离散对数问题。假设$(G,\cdot)$是一个群，$g \in G$是一个n阶元素，我们要计算元素$y_a \in \left \langle g \right \rangle$的离散对数。由于$\left \langle g \right \rangle$是n阶循环群，可以把$\log_{g} y_a$看做$\mathbb{Z}_{n}$中的元素。\\
+\indent 与因子分解的$\rho$算法一样，通过迭代一个貌似随机的函数f，构造一个序列$x_1, x_2, x_3, \cdots $。一旦在序列中得到两个元素$x_i$和$x_j$，满足$x_i = x_j$，这里$i<j$，我们就有希望计算出$\log_{g} y_a$。\\
+\indent 设$S_1 \cup S_2 \cup S_3$是群G的一个划分，它们的元素个数大致相同。定义函数$f:\left \langle g \right \rangle \times \mathbb{Z}_{n} \times \mathbb{Z}_{n} \rightarrow \left \langle g \right \rangle \times \mathbb{Z}_{n} \times \mathbb{Z}_{n}$如下：
+$$\left\{\begin{matrix}
+(y_ax,a,b+1) & x \in S_1\\
+(x^2,2a,2b) & x \in S_2\\
+(gx,a+1,b) & x \in S_3
+\end{matrix}\right.$$
+\indent 在这里，将划分$S_1,S_2,S_3$定义为如下形式： \\
+$$S_1 = \left \{ x \in \mathbb{Z}_{p}:x\equiv 1(mod \,3) \right \}$$
+$$S_2 = \left \{ x \in \mathbb{Z}_{p}:x\equiv 0(mod \,3) \right \}$$
+$$S_3 = \left \{ x \in \mathbb{Z}_{p}:x\equiv 2(mod \,3) \right \}$$
+\\
+\indent 程序执行的算法如下：\\
+\includegraphics[width=300pt,height=400pt]{figure2} \\
+
+\section{实验代码}
+
+\section{运行截图}
+\includegraphics[width=300pt,height=400pt]{figure3} \\
+
+\section{结果分析}
+\section{总结}
+\indent 本次实验要求求解DLP问题，这本身是一个困难问题，但既然布置成为作业，说明根据题目给出的数据可以找到窍门并攻破它。我在实验中选择了$Pollard's \,\rho  \,algorithm$，在找到碰撞之后，发现根据书上的算法程序会得到结果“failure”，这时根据书上的一句话可以找到继续完成下去的线索：“如果$gcd({b}' - b,n)=d$，容易证明同余方程$c({b}' - b)\equiv a - {a}'(mod \: n)$，恰有d个解。假如d不是很大的话，可以直接算出同余方程的d个解并检验哪个解是正确的。”于是输出$gcd({b}' - b,n)$发现其值等于2，也就是说一次同余方程$c({b}' - b)\equiv a - {a}'(mod \: n)$有两个解。根据求解一次同余式的方法便可以计算出这些解，最后再验证哪一个是正确的。 \\
+\indent 这里在求解一次同余方程$c({b}' - b)\equiv a - {a}'(mod \: n)$ 时候遇到一个比较坑的地方，程序中需要用${b}' - b$除以$gcd({b}' - b,n)$，而${b}' - b$在本题目中是一个特别大的数，因此得到的结果便自动显示为了科学计数法，这一转换不要紧，可给后面的计算增加了不小的麻烦，明明感觉算法思路都没有问题，可是答案总是计算不正确。 \\
+\indent 后来便思考着用另外的方法求解一次同余方程，再写了一种方法。将$c({b}' - b)\equiv a - {a}'(mod \: n)$式中每一项都除以$gcd({b}' - b,n)$之后，就可以用求逆的方法得到结果。这里本该有逆，但得到的结果却显示求逆是求不出来的，花了好大功夫才发现，我计算出的${b}' - b$是负数，才导致了程序算不出逆，于是将它加上模数，直到加为正数之后，这才让求逆的运算正常运作。 \\
+\indent 后来经过同学的提醒才发觉了${b}' - b$除以$gcd({b}' - b,n)$这里出现的问题。用“/”符号会得到科学计数法，用整除符号“//”才可以得到正确的结果。于是改了这个地方之后，答案终于正确了。
+
+\end{document}
